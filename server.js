@@ -17,11 +17,21 @@ const redisClient = createClient({
 redisClient.on('error', (err) => console.error('Erreur Redis', err));
 
 async function startServer() {
-  await redisClient.connect();
+  try {
+    await redisClient.connect();
+  } catch (err) {
+    console.error('Impossible de se connecter à Redis:', err);
+  }
 
   const server = http.createServer(async (req, res) => {
-    // Incrémenter le compteur dans Redis
-    let visits = await redisClient.incr('visits');
+    let visits = 'Indisponible';
+    try {
+      if (redisClient.isOpen) {
+        visits = await redisClient.incr('visits');
+      }
+    } catch (err) {
+      console.error('Erreur lors de l’incrément Redis:', err);
+    }
 
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.write(`<h1>Nombre de visites : ${visits}</h1>`);
