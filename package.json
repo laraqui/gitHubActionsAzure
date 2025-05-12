@@ -1,5 +1,5 @@
 {
-  "name": "visit-counter-redis",
+  "name": "visit-counter",
   "version": "1.0.0",
   "description": "App Node.js avec compteur persistant grâce à Redis",
   "main": "server.js",
@@ -7,7 +7,6 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "dotenv": "^16.5.0",
-    "redis": "^4.6.7"
+    "express": "^5.1.0"
   }
 }

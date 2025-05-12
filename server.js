@@ -1,68 +1,37 @@
-require('dotenv').config();
 const express = require('express');
-const { createClient } = require('redis');
-
+const fs = require('fs');
+const path = require('path');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-// Configuration Redis sécurisée
-const client = createClient({
-  socket: {
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT || 6380,
-    tls: true,
-  },
-  password: process.env.REDIS_PASSWORD
-});
+const counterFile = path.join(__dirname, 'counter.json');
 
-// Connexion Redis
-client.connect()
-  .then(() => console.log('✅ Connecté à Redis'))
-  .catch((err) => console.error('Erreur Redis', err));
-
-app.get('/', async (req, res) => {
+// Fonction pour lire le compteur depuis le fichier
+function readCounter() {
   try {
-    const visits = await client.incr('counter');
-    res.send(`Nombre de visites : ${visits}`);
+    const data = fs.readFileSync(counterFile, 'utf8');
+    return JSON.parse(data).count || 0;
   } catch (err) {
-    res.status(500).send('Erreur Redis');
+    return 0; // Par défaut, 0 si le fichier n’existe pas
   }
-});
-
-
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur démarré sur le port ${PORT}`);
-});
-
-redisClient.on('error', (err) => console.error('Erreur Redis', err));
-
-async function startServer() {
-  try {
-    await redisClient.connect();
-  } catch (err) {
-    console.error('Impossible de se connecter à Redis:', err);
-  }
-
-  const server = http.createServer(async (req, res) => {
-    let visits = 'Indisponible';
-    try {
-      if (redisClient.isOpen) {
-        visits = await redisClient.incr('visits');
-      }
-    } catch (err) {
-      console.error('Erreur lors de l’incrément Redis:', err);
-    }
-
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.write(`<h1>Nombre de visites : ${visits}</h1>`);
-    res.write(`<h2>Serveur : ${os.hostname()}</h2>`);
-    res.end();
-  });
-
-  const port = process.env.PORT || 3000;
-  server.listen(port, () => {
-    console.log(`Serveur - Node.js démarré sur le port ${port}`);
-  });
 }
 
+// Fonction pour sauvegarder le compteur dans le fichier
+function saveCounter(count) {
+  fs.writeFileSync(counterFile, JSON.stringify({ count }), 'utf8');
+}
 
+let visitCount = readCounter();
+
+app.get('/', (req, res) => {
+  visitCount++;
+  saveCounter(visitCount);
+  res.send(`
+    <h1>Welcome to the Visit Counter App!</h1>
+    <p>Visitor count: ${visitCount}</p>
+  `);
+});
+
+app.listen(port, () => {
+  console.log(`App is running on http://localhost:${port}`);
+});
