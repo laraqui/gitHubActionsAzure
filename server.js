@@ -31,7 +31,7 @@ async function startServer() {
 
   const port = process.env.PORT || 3000;
   server.listen(port, () => {
-    console.log(`Serveur Node.js démarré sur le port ${port}`);
+    console.log(`Serveur - Node.js démarré sur le port ${port}`);
   });
 }
 
