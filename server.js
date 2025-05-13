@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,15 +23,18 @@ function saveCounter(count) {
 }
 
 let visitCount = readCounter();
+const serverName = os.hostname();
 
 app.get('/', (req, res) => {
   visitCount++;
   saveCounter(visitCount);
   res.send(`
     <h1>Welcome to the Visit Counter App!</h1>
-    <p>Visitor count: ${visitCount}</p>
+    <p>Visitor count: ${visitCount} <br> Nom du serveur : ${serverName} </p>
   `);
 });
+
+
 
 app.listen(port, () => {
   console.log(`App is running on http://localhost:${port}`);
